@@ -1,0 +1,525 @@
+\newcommand\ignore[1]{}
+\documentclass[pdftex,letterpaper,12pt]{article}
+%\documentclass[pdftex,10pt]{article}
+%\documentclass[10pt]{article}
+\usepackage{listings}
+\usepackage{multirow} 
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{scrextend}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{bm}
+
+\usepackage{fancyvrb}
+\usepackage{kbordermatrix} % include package @ document preamble
+%\renewcommand{\kbldelim}{(} % change default array delimiters to parentheses
+%\renewcommand{\kbrdelim}{)}
+\usepackage[pdftex]{color, graphicx}
+\usepackage{float} % H really nails the location.
+\usepackage{afterpage}% for "\afterpage"
+\usepackage{verbatim,amsmath, amssymb, booktabs,mathtools}
+\usepackage[]{algorithm2e}
+\usepackage{url}
+\usepackage[colorlinks=true, linkcolor=blue, filecolor=blue,urlcolor=blue, citecolor=blue]{hyperref}%\usepackage[pdftex, pdfstartview={FitH}, pdfnewwindow=true,
+%colorlinks=false, pdfpagemode=UseNone]{hyperref}
+\usepackage{hyperref}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%  See http://latexcolor.com
+\definecolor{gray}{rgb}{0.9,0.9,0.9}
+\definecolor{lightred}{rgb}{1.0,0.24,0.24}
+\definecolor{darkred}{rgb}{0.5,0.0,0.0}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{darkgreen}{rgb}{0.0,0.39,0.0}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{purple}{rgb}{0.5,0.0,0.4}
+\definecolor{lightpurple}{rgb}{0.9,0.0,0.8}
+\definecolor{mauve}{rgb}{0.88, 0.69, 1.0}
+\definecolor{antiquewhite}{rgb}{0.98, 0.92, 0.84}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+\newcommand{\green}[1]{\textcolor{darkgreen}{#1}}
+\newcommand{\purple}[1]{\textcolor{purple}{#1}}
+\addtolength{\oddsidemargin}{-.875in}
+\addtolength{\evensidemargin}{-.875in}
+\addtolength{\textwidth}{1.75in}
+
+\addtolength{\topmargin}{-.875in}
+\addtolength{\textheight}{1.75in}
+
+%\setlength{\parindent}{5 mm}
+\setlength{\parindent}{5 mm}
+\setlength{\parskip}{10pt}
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{4}
+
+% Laziness shortcuts
+\newcommand\dd{\partial}
+\newcommand{\nn}{\nonumber \\}
+\newcommand\be{\begin{equation}}
+\newcommand\ee{\end{equation}}
+\newcommand\bverb{\begin{verbatim}}
+\newcommand\everb{\end{verbatim}}
+\newcommand\bea{\begin{eqnarray}}
+\newcommand\eea{\end{eqnarray}}
+\newcommand{\<}{\langle}
+\renewcommand{\>}{\rangle}
+\newcommand\boxit[1]{\noindent\fbox{ \parbox{16cm}{ #1}}}
+
+\newcommand\sumin{\sum_{i=1}^N}
+
+\usepackage{listings}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C++,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\lstset{escapechar=@,style=customc}
+
+%\pagecolor{aliceblue}
+
+\begin{document}
+
+
+\begin{center}
+\bf \Large  Assignment 1: Floating Point Numbers \\
+due: Jan 30, 2020 -- in class
+\end{center}
+
+\boxit{
+{\bf \Large GOAL:} The main purpose of this exercise is to make sure
+everyone has access to the necessary computation and software tools
+for this class: a C compiler, the graphing program
+gnuplot, and for future use the symbolic and numeric evaluator Mathematica
+(easy way to check algebra and do amazing graphics). In this class, there will
+be help to make sure everyone's laptop  is functional and  have
+access to the \href{https://www.bu.edu/tech/support/research/computing-resources/scc/}{
+Shared Computer Cluster}. }
+
+\section{Background} 
+\subsection{Numerical Calculations}
+
+
+\noindent
+{\bf LANGUAGES \& BUILT IN  DATA FORMATS:}
+The primary language at present used for high performance numerical
+calculations is C or C++. The standard environment is the Unix or Linux
+operating system. For this reason, C and Unix tools will be emphasized. 
+We will introduce some common tools such as Makefiles and gnuplot.
+
+That said, modern software practices take advantage of a (vast) variety
+of high level languages as well. You  also may use a bit of two symbolic or interpreted
+languages, Mathematica or  Python respectively, because of the power they have to
+prototype, test, and visualize simple algorithms. Little prior knowledge
+except familiarity with C will be assumed.
+
+In large scale computing all data must be {\emph{represented}} somehow---for
+numerical computing, this is often as a {\emph{floating point}} number. 
+Floats don't cover every possible real number (there are a lot of them between
+negative and positive infinity, after all). They can't even represent the fraction
+$1/3$ exactly. Nonetheless, they can express a vast expanse of numbers both
+in terms of precision as well as the orders ointerpretedf magnitude they span. 
+
+As you'll learn in this exercise, round off error, stability, and accuracy
+will always be issues you should be aware of. As a starting point, you should
+be aware of how floating points are represented. Each language has some standard built in 
+data formats. Two common ones are 32 bit \verb|float|s and 64 bit \verb|double|s, in C lingo. To get an idea of how these
+formats work on a bit-by-bit level, give a look at
+\href{https://en.wikipedia.org/wiki/Single-precision\_floating-point\_format}{https://en.wikipedia.org/wiki/Single-precision\_floating-point\_format}
+  and 
+\href{https://en.wikipedia.org/wiki/Double-precision\_floating-point\_format}{https://en.wikipedia.org/wiki/Double-precision\_floating-point\_format}.
+
+
+You'll notice we're not shy about hopping off to the web to supplement the information
+we've put in this document and will discuss in class, and we expect you to do the same
+when you need to. {\bf Searching the web is part of this course.}
+
+As a last remark before we hop into some math, bear in mind that data types keep evolving.
+{\bf Big Data} applications (deep learning!) are now using {\bf smaller} 16 bit floats for a lot of applications. Why?  Images often
+use 8 bit integer RGB formats. Some very demanding high precision science and
+engineering applications use 128 bit floats (quad precession).  There are lots of
+tricks in code. Symbolic codes represent some numbers like $\boldsymbol{\pi}$
+and $\boldsymbol{e}$ as a  special token since there are no  finite bit representations!
+See for more about these issues: \href{https://en.wikipedia.org/wiki/Floating\_point}{https://en.wikipedia.org/wiki/Floating\_point}.
+
+\subsection{Finite Differences}
+
+A common operation in calculus is the {\emph{derivative}}: the local
+slope of a function. With pencil and paper, it's straightforward to
+evaluate derivative analytically for well known functions. For example:
+%
+\be
+\left. \frac{d}{dx} \sin(x) \right|_{x = x_0} = \cos(x_0)
+\ee
+%
+On a computer, however, it's a bit of a non-trivial exercise to
+perform the analytic derivative (you'd need a text parser, you'd need to encode
+implementations of many functions... there's a reason there are only a
+few very powerful analytic tools, such as Mathematica, that handle this). In numerical
+work the standard method is to approximate the limit, 
+\be
+\frac{df(x)}{dx} \equiv \lim_{h \rightarrow 0} \frac{f(x+h)-f(x)}{h} 
+\ee 
+with a finite but small enough difference
+$h$. The good news is this is completely general... the bad news is
+this is only an approximation and it is prone to errors. Due to round off,
+it's dangerous for $h$ to get close to zero. 0/0 is an ill-defined quantity!
+
+One approximation of a derivative is the {\emph{forward finite difference}}, which
+should look familiar:
+%
+\begin{align}
+D^{+}_h f(x) &= \frac{f(x+h)-f(x)}{h}
+\end{align}
+%
+Two other methods are the
+backward difference 
+%
+\begin{align}
+D^{-}_h f(x) &= \frac{f(x)-f(x-h)}{h}
+\end{align}
+%
+and  average or central difference. The point of this
+exercise is to implement different types of differences, as well as
+test the effect of the step size $h$.
+
+\section{Written Exercise}
+
+Computer Engineering is  link between mathematics (logic)  and
+hardware (physics). The kind of math stuff you need is very practical part  often submerged
+in math courses in too much formalism.   You learn this language by
+speaking it.  To make this link the current
+exercise is to  google  how you expand a   function in a Taylor series. Most
+often the quadratic approximation is enough,
+%
+\begin{equation}
+f(x + h) \simeq f(x) + hf'(x) + (h^2)/2 f''(x) 
+\end{equation}
+%
+for {\em small} $h$.
+
+More generally we can write more and more term (if you care!)
+\begin{equation}
+f(x + h) \simeq f(x) + h\frac{df(x)}{dx} + \frac{h^2}{2!}
+\frac{d^2f(x)}{dx^2}  + \frac{h^3}{3!} 
+\frac{d^3f(x)}{dx^3}  + + \frac{h^4}{4!} 
+\frac{d^4f(x)}{dx^4}   + O(h^5) 
+\end{equation}
+ This means the error using 3 term scales like $h^4$ or using 4 term is $h^5$ etc.
+
+\subsection{Part 1: Averaging for and backward Differences}
+
+Calculate using {\em pencil and paper}  the following expressions,
+\begin{align}
+a = D^{+}_h f(x) =  [f(x+h) - f(x)]/h &= ? + O(?)  \nn
+ b = D^{-}_h f(x) =  [f(x) - f(x-h)]/h &= ? + O(?) \nn
+A = D^{+}_{2h}f(x)  = [f(x+2h) - f(x)]/(2h) &= ? + O(?) \nn
+ B = D^{-}_{2h}f(x)  = [f(x) - f(x-2h)]/(2h) &= ? + O(?) \nn
+(1/2) [f(x+h) - f(x-h)]/h &= ? + O(?)  
+\label{eq:Expand}
+\end{align}
+%
+ using the Taylor series expression above in powers of $h$
+.
+Note the last expresion in Eq.~\ref{eq:Expand} is just the average of the first two:
+$(a+b)/2$.  This is the {\em central difference} which cancels all odd
+$h$ powers in  the expansion (or odd terms for the approximate derivative.)
+
+ HINT:  Do this the easy way! The quadratic approximation is enough for this.
+
+\subsection{Part 2: Double averaging}
+
+For extra credit combine the 4 expression of the derivative $a,b, A,B$
+with magic weights to reduce the error to $h^5$.
+\be
+2 a/3 + 2 b/3 - (A/6 +B/6)  = \frac{df(x)}{dx}  + O(h^5)  
+\label{eq:AvCentral}
+\ee
+This a clever {\em average}  of two central difference!
+Do the algebra to get the magic formula in Eq.~\ref{eq:AvCentral}. It is ok (as I did) to 
+use Mathematica  or some symbolic program to get the actual expression for the error term to 
+be $(h^4/30) \frac{d^5f(x)}{dx^5}$!  It is smart to {\em cheat}  but also good to do it out my hand
+to really understand what you are doing and
+to exercise your brain.
+
+\section{Programming Exercises}
+
+\subsection{Part 1: Simple C Exercise}
+
+For this first exercise we've included the shell of a program below;
+it's your job to fill in the missing bits. The purpose of this program
+is to look at the forward, backward, and central difference of the
+function $\sin(x)$ at the point $x = 1$ as a function of the step size
+$h$. You should also print the exact derivative $\cos(x)$ at  $x = 1$
+in each column. 
+
+\begin{verbatim}
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+
+double function(double x) {
+  return sin(x);
+}
+
+double derivative(double x) {
+  return cos(x);
+}
+
+double forward_diff(double x, double h) {
+  return (function(x+h)-function(x))/h;
+}
+
+double backward_diff(double x, double h) {
+  // return the backward difference.
+}
+
+double central_diff(double x, double h) {
+  // return the central difference.
+}
+
+int main(int argc, char** argv)
+{
+  double h;
+  const double x = 1.0;
+
+  // Set the output precision to 15 decimal places (the default is 6)!
+
+  // Loop over 17 values of h: 1 to 10^(-16).
+  for (h = /*...*/; h /*...*/; h *= /*...*/)
+  {
+    // Print h, the forward, backward, and central difference of sin(x) at 1,
+    // as well as the exact derivative cos(x) at 1.
+    // Should you use spaces or tabs as delimiters? Does it matter?
+    cout << /*...*/ << cos(1.0) << "\n";
+  }
+  return 0;
+}
+\end{verbatim}
+
+Don't be afraid to search online for any information you don't know!
+I'm not good at programming, I'm good at Googling and I'm good at
+debugging. You should name your C++ program {\verb|findiff.cpp|}. You can compile it with:
+
+\begin{verbatim}
+g++ -O2 findiff.cpp -o findiff
+\end{verbatim}
+
+
+
+
+\subsection{Part 2: Plotting using gnuplot}
+
+You have all of this data, now what? To visualize how the finite
+differences for different $h$ compares with the analytic derivative,
+we can plot the data using the program \verb|gnuplot|.  Using the
+output file you generated with C or with Python (which should be
+equivalent!), plot the relative error in the forward, backward, and central difference
+as a function of $h$. This is similar to what is being plotted on the right hand
+side of Fig.~3 in the Lecture notes. As a reminder, the relative error is defined as:
+%
+\begin{align}
+\frac{\left|\mbox{approximate} - \mbox{exact}\right|}{\left|\mbox{exact}\right|}
+\end{align}
+%
+Don't forget to set $x$ and $y$ labels on your graph, and titles for each curve in the
+key.
+
+
+By default \verb|gnuplot| will output to the screen. You'll want to
+submit an image at the end of the day; the commands
+\verb|set terminal| and \verb|set output| will be helpful in this
+regard! As an FYI: while it's best to play with making plots in the
+\verb|gnuplot| terminal, it can get annoying to do everything there!
+\verb|gnuplot| can just run a script file:
+
+\begin{verbatim}
+gnuplot -e "load \"[scriptname].gp\""
+\end{verbatim}
+
+Where you should replace \verb|[scriptname]| with, well, the name of your plotting script!
+
+
+\vskip 1 cm
+
+\boxit{
+{\bf Extra Credit\& Extra Fun:}  Once you have a program, it is good
+to see what else you can do.  Try functions,  $10^{-6} x + 10^{20}$
+and $e^{ - 10 x}$ at $x =1$. You can do more if you get hooked. 
+
+If  you want to see a function that is difficult to numerically
+approximate, try the derivative of $\sin(1/x)$, which is exactly
+$-\frac{\cos(1/x)}{x^2}$, at some point close to zero, say $x =
+0.0001$. Your don't have to pass this in, but you can brag about in class for
+virtual extra credit and show the result in class. Discussion
+variation of the assignments is part of classroom activities.  }
+
+\subsection{Submitting Your Assignment}
+
+This written part of  first assignment is due in class Thursday,
+January 30. Pass in the graphic output if you wish. The 
+source codes and graphic output  must be deposited in hour CCS account
+\verb!/projectnb/LoginName/HW1! It must compile from a Makefile.  This will insure that all codes
+will compile and run in a uniform high performance environment. 
+On GitHub there will be a Makefile that does the compilation automatically.
+{\textbf{Do NOT include a compiled executable!}} in \verb!HW1! That's
+a dangerous, unsafe practice to get into. 
+
+
+\appendix
+\section{Software Tools: Nothing to Pass in!}
+
+
+You will want a conventional unix  environment on your laptop. Mac users
+will have this with easy.  On window you will need some sort of
+virtualization of your choice -- this is up to you.  One possibility is access to 
+BU's ``Linux Virtual Lab" by following the instructions here:
+
+ \url{http://www.bu.edu/tech/services/support/desktop/computer-labs/unix/}
+
+These Linux machines aren't for running long calculations, but they are useful for small, interactive jobs. (I think any job will get killed after 15 minutes---don't quote me on that.) These machines also allow access to Mathematica. 
+
+{\textbf{Access to BU Computing is not a substitute for installing Mathematica and standard Unix compilers on your own machine, as described below.}}
+
+
+\subsubsection{Part I: Making sure you have a C++ compiler}
+
+In this class, we'll be using the standard compiler ``g++". If you have a Mac or a Linux install, g++ may exist already. Try running the command:
+
+\boxit{
+\texttt{which g++}
+}
+
+from the terminal. On my machine, it returns:
+
+\boxit{
+\texttt{/usr/bin/g++}
+}
+
+But your mileage may vary. If it returns nothing, it means you don't have g++ installed, which you should go do! I'd be surprised if it wasn't installed, though.
+
+If you're on Windows, you'll need to install Cygwin, which even I
+struggled with, or other like installing Linux in a virtual box! 
+I suggest Window folks google and trade method on Slack.We will try to help but {\em Windowology} is
+not part of the coarse -- so good luck. 
+
+
+To make sure you understand compiling without an IDE (Integrated Development Environment), since all code homework must run as is 
+on your the CCS.
+
+Amazing Interactive Tutorials: C++
+
+\href{http://www.tutorialspoint.com/cplusplus/index.htm}{http://www.tutorialspoint.com/cplusplus/index.htm}
+
+\subsubsection{Part II: Installing gnuplot}
+
+You may have gnuplot already installed on your machine. You can test this the same way we tested for g++:
+
+\boxit{
+\texttt{which gnuplot}
+}
+
+If it returns a path, you have gnuplot installed! If not, use your favorite package manager to install it. I'm an Ubuntu user, so I had to run:
+
+\boxit{
+\texttt{sudo apt-get install gnuplot}
+}
+
+If you're on a different distribution, you'll probably need to use \texttt{yum}, or some GUI tool. On Mac OS X, an optional package manager is Brew: \url{http://brew.sh/}, which will help you out. 
+
+By looking around on stackoverflow, I found a sample brew install command:
+
+\boxit{
+\texttt{brew install gnuplot --wx --cairo --pdf --with-x --tutorial}
+}
+
+Which will let you output PDFs as well as to the screen (that's the whole \texttt{with-x} and \texttt{wx}), I imagine. If you get stuck, let us know!
+
+To test out gnuplot in OS X or Linux, run:
+
+\boxit{\texttt{gnuplot}}
+
+from the terminal. This will put you in an interactive gnuplot terminal. A few useful commands:
+\begin{verbatim}
+# Hashes aren't for twitter, they're for comments in gnuplot!
+plot sin(x) # plot the sine function
+f(x) = cos(x) # assign a function
+plot sin(x), f(x) # plot two functions at once.
+set xrange [0:2] # change the x axis.
+set yrange [-2:2] # change the y axis range.
+replot # update the plot with your new axis.
+set yrange [-5:-2] # change the y axis range again.
+replot # you won't see anything! So do...
+reset # ... because you've messed up!
+set xrange [-1:1]
+plot x*sin(1/x) # This will lootk really bad!
+set samples 1000 # sample the function more frequently.
+replot # it should look a lot better now
+exit # and we're done!
+\end{verbatim}
+
+Your will want to save a figure from time to time. In this case 
+before  you exit add in these instructions.
+\begin{verbatim}
+set term postscript color  #one option that gives a .ps figure.
+set output "myfigure.ps"   #whatever you want to name it
+replot                     #send it to the output
+set term x11               #return to interactive view.
+                           #On linux, you may need ``wxt'' instead of x11.
+\end{verbatim}
+
+
+\subsubsection{Part III: Installing Mathematica}
+
+As students, you can luckily install Mathematica on your own computer without much pain. Follow this link and install Mathematica:
+
+\href{http://www.bu.edu/tech/services/cccs/desktop/distribution/mathsci/mathematica/student/}{http://www.bu.edu/tech/services/cccs/desktop/distribution/mathsci/mathematica/student/}
+
+We've tested this on both Windows and Mac OS X. Mathematica will also work on standard Linux distros, we've just never tried installing it there ourselves---please try and let us know asap if you have issues. 
+
+After installing Mathematica, you should go through the following quick tutorials. They cover very simple topics, such as plotting, differentiation, and integration. The differentiation and integration articles go into much deeper mathematical detail than you'll need in this class! Just gleam out how to take a simple derivative and perform a simple integral. Don't let the word ``Hessian" scare you. 
+
+\begin{itemize}
+\item Plotting functions: \url{https://reference.wolfram.com/language/tutorial/BasicPlotting.html}
+\item Plotting data: \url{https://reference.wolfram.com/language/howto/PlotData.html}
+\item Differentiation: \url{https://reference.wolfram.com/language/tutorial/Differentiation.html}
+\item Integration: \url{https://reference.wolfram.com/language/tutorial/Integration.html}
+\end{itemize}
+
+We will suggest further reading as the need arises!
+
+\subsubsection{Part V: Installing Anaconda for Python}
+
+If you are {\em Pythonista} and wish to use this  environment
+for rapid prototyping you can get  Anaconda distribution of python at 
+
+\href{https://www.continuum.io/downloads}{https://www.continuum.io/downloads}
+
+Get the one for Python 3.5 for your computer(s).
+
+
+\href{https://docs.python.org/2/tutorial/index.html}{https://docs.python.org/2/tutorial/index.html}
+
+
+Amazing Interactive Tutorials:
+
+\href{https://docs.python.org/2/tutorial/index.html}{https://docs.python.org/2/tutorial/index.html}
+
+\href{http://www.tutorialspoint.com/python3/index.htm}{http://www.tutorialspoint.com/python3/index.htm}
+
+\href{http://docs.python-guide.org/en/latest/writing/style/\#zen-of-python}{http://docs.python-guide.org/en/latest/writing/style/\#zen-of-python}
+
+
+\end{document}
