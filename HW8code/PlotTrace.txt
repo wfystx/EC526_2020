@@ -1,0 +1,8 @@
+# To  run this go into gnuplot and  type:  load "PlotTrace.txt"
+#set output "double.eps"  #name of figure 
+#set term postscript color  #setting out put
+TraceFile = "Trace_th1=1.00_th2=2.00_v1=2.00_v2=-2.00_tmax= 1000.00_dt=0.001000_tsample=0.010000.dat"
+#TraceFile = "Trace.dat"    #Test Data 
+plot [1:1000] TraceFile  using 1:6 with lines
+replot [1:1000]  TraceFile  using 1:7  with lines
+#set term x11   #reintializing terminal
